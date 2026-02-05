@@ -1,63 +1,50 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-}
+import { useEffect, useState } from "react";
+import EmployeeForm from "./EmployeeForm";
+import EmployeeList from "./EmployeeList";
 
-.container {
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
-}
+export default function App() {
+  const [employees, setEmployees] = useState([]);
+  const [editEmployee, setEditEmployee] = useState(null);
 
-h1 {
-  text-align: center;
-}
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("employees"));
+    if (stored) setEmployees(stored);
+  }, []);
 
-.form {
-  background: #fff;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 5px;
-}
+  useEffect(() => {
+    localStorage.setItem("employees", JSON.stringify(employees));
+  }, [employees]);
 
-.form input {
-  display: block;
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-}
+  const addEmployee = (emp) => {
+    setEmployees([...employees, { ...emp, id: Date.now() }]);
+  };
 
-button {
-  padding: 8px 12px;
-  margin-right: 5px;
-  cursor: pointer;
-}
+  const updateEmployee = (updatedEmp) => {
+    setEmployees(
+      employees.map((emp) => (emp.id === updatedEmp.id ? updatedEmp : emp))
+    );
+    setEditEmployee(null);
+  };
 
-.delete {
-  background: #e74c3c;
-  color: white;
-}
+  const deleteEmployee = (id) => {
+    setEmployees(employees.filter((emp) => emp.id !== id));
+  };
 
-.search {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-}
+  return (
+    <div className="container">
+      <h1>Employee Management System</h1>
 
-table {
-  width: 100%;
-  background: white;
-  border-collapse: collapse;
-}
+      <EmployeeForm
+        addEmployee={addEmployee}
+        editEmployee={editEmployee}
+        updateEmployee={updateEmployee}
+      />
 
-th,
-td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: center;
-}
-
-.empty {
-  text-align: center;
-  color: gray;
+      <EmployeeList
+        employees={employees}
+        onDelete={deleteEmployee}
+        onEdit={setEditEmployee}
+      />
+    </div>
+  );
 }
